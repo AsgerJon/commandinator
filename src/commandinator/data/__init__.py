@@ -5,8 +5,6 @@ data objects for minecraft commands and data packs. """
 from __future__ import annotations
 
 from ._wip_field import WIPField, FieldNotYetImplemented
-from ._abstract_data import AbstractData
 from ._color import Color
-from ._format_flags import FormatFlags
 from ._text import Text
 from ._lore import Lore

@@ -4,12 +4,10 @@ instances. """
 #  Copyright (c) 2024 Asger Jon Vistisen
 from __future__ import annotations
 
-import json
-
 from worktoy.base import overload
 from worktoy.desc import AttriBox
 
-from commandinator.data import Text, AbstractData
+from commandinator.data import Text
 
 
 class Lore(Text):
@@ -19,8 +17,11 @@ class Lore(Text):
   __iter_contents__ = None
 
   lines = AttriBox[list]()
-  header = AttriBox[Text]()
+  header = AttriBox[Text]('')
   lineLength = AttriBox[int](50)
+
+  def __init__(self, *args) -> None:
+    """Initialize the 'Lore' class."""
 
   def __iter__(self, ) -> Lore:
     """Implementation of the iterator protocol."""
@@ -39,16 +40,29 @@ class Lore(Text):
 
   def __str__(self) -> str:
     """String representation"""
-    if self.header or self.lines:
-      out = []
-      if self.header:
-        out.append(str(self.header))
-      for line in self.lines:
-        out.append(str(line))
-      return ', '.join(out)
-    else:
+    if not self.header:
       return ''
+    for line in self.lines:
+      line.color = self.color
+      line.italic = self.italic
+      line.bold = self.bold
+      line.underlined = self.underlined
+      line.strikethrough = self.strikethrough
+      line.obfuscated = self.obfuscated
+    loreLines = [self.header, *self.lines]
+    loreCodes = ["""'%s'""" % str(line) for line in loreLines]
+    return """[%s]""" % ', '.join(loreCodes)
 
   def __bool__(self) -> bool:
     """Boolean representation"""
     return True if self.header or self.lines else False
+
+  @overload(Text)
+  def append(self, line: Text) -> None:
+    """Append a line to the lore."""
+    self.lines.append(line)
+
+  @overload(str)
+  def append(self, line: str) -> None:
+    """Append a line to the lore."""
+    self.lines.append(Text(line))

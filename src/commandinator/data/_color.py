@@ -3,17 +3,13 @@
 #  Copyright (c) 2024 Asger Jon Vistisen
 from __future__ import annotations
 
-from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from worktoy.base import BaseObject, overload, FastObject
-from worktoy.desc import AttriBox, THIS
-from worktoy.text import typeMsg
-
-from commandinator.data import AbstractData
+from worktoy.base import FastObject
+from worktoy.desc import AttriBox
 
 
-class Color(AbstractData):
+class Color(FastObject):
   """Color provides a class representation of the colors in Minecraft."""
   red = AttriBox[int](255)
   green = AttriBox[int](255)
@@ -32,23 +28,10 @@ class Color(AbstractData):
       return r, g, b
     raise NotImplementedError  # Common colors not yet implemented
 
-  @overload(int, int, int)
   def __init__(self, red: int, green: int, blue: int) -> None:
     self.red = red
     self.green = green
     self.blue = blue
-
-  @overload(str)
-  def __init__(self, hexColor: str) -> None:
-    self.__init__(*self.parseColor(hexColor))
-
-  @overload(THIS)
-  def __init__(self, otherColor: FastObject) -> None:
-    if isinstance(otherColor, Color):
-      self.__init__(otherColor.red, otherColor.green, otherColor.blue)
-    else:
-      e = typeMsg('otherColor', otherColor, type(self))
-      raise TypeError(e)
 
   def _getHex(self) -> str:
     """Getter-function for hex representation in %s style"""

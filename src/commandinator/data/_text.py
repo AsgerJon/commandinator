@@ -3,56 +3,57 @@
 #  Copyright (c) 2024 Asger Jon Vistisen
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
-from worktoy.desc import AttriBox, Field
-from worktoy.base import overload
-from worktoy.parse import maybe
+from worktoy.desc import AttriBox
+from worktoy.base import overload, BaseObject
+from worktoy.text import monoSpace
 
-from commandinator.data import AbstractData, Color, FormatFlags, WIPField
-from moreworktoy import dict2str
+from commandinator.data import Color
 
 if TYPE_CHECKING:
-  from commandinator import AbstractItem
+  pass
+
+FALSE = """false"""
+TRUE = """true"""
+BOOL = lambda x: '%s' % (TRUE if x else FALSE,)
 
 
-class Text(AbstractData):
-  """Text provides a class representation of the texts in Minecraft. """
+class Text(BaseObject):
+  """CANCER SYNTAX"""
 
-  text = AttriBox[str]()
-  color = AttriBox[Color]()
+  text = AttriBox[str]('')  # FUCK YOU
+  color = AttriBox[Color](255, 0, 144)  # KILL YOURSELF
   italic = AttriBox[bool](False)
   bold = AttriBox[bool](False)
   underlined = AttriBox[bool](False)
   strikethrough = AttriBox[bool](False)
   obfuscated = AttriBox[bool](False)
 
-  #  Not yet implemented
-  insertion = WIPField()
-  clickEvent = WIPField()
-  hoverEvent = WIPField()
+  def __str__(self) -> str:
+    """Returns the syntax for when the item is inside a container,
+    which is fucking different from normal. FUCK YOU!!"""
+    fmtSpec = monoSpace("""{"text": "%s", "color": "%s", 
+    "italic": %s, "bold": %s, "underlined": %s,
+    "strikethrough": %s, "obfuscated": %s
+    }""")
+    values = [self.text, str(self.color), BOOL(self.italic),
+              BOOL(self.bold), BOOL(self.underlined),
+              BOOL(self.strikethrough), BOOL(self.obfuscated)]
+    return fmtSpec % (*values,)
 
-  def __init__(self, text: str = None) -> None:
-    self.text = maybe(text, '')
+  @overload(str, int, int, int)
+  def __init__(self, text: str, r: int, g: int, b: int) -> None:
+    self.color = Color(r, g, b)
+    self.text = text
 
-  def __str__(self, ) -> str:
-    """String representation"""
-    out = {'text': self.text}
-    if self.color:
-      out['color'] = str(self.color)
-    if not self.italic:
-      out['italic'] = 'false'
-    if self.bold:
-      out['bold'] = 'true'
-    if self.underlined:
-      out['underlined'] = 'true'
-    if self.strikethrough:
-      out['strikethrough'] = 'true'
-    if self.obfuscated:
-      out['obfuscated'] = 'true'
-    return dict2str(out)
+  @overload(str)
+  def __init__(self, text: str) -> None:
+    self.__init__(text, 255, 0, 144)
 
-  def __bool__(self, ) -> bool:
-    """Boolean representation"""
+  @overload()
+  def __init__(self) -> None:
+    self.__init__('', 255, 0, 144)
+
+  def __bool__(self) -> bool:
     return True if self.text else False
